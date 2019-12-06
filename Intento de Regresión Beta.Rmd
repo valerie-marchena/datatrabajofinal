@@ -1,0 +1,78 @@
+
+DATA - PROYECTO ESTADISTICA 2
+
+
+```{r}
+link="data_final_proyecto_stad2.xlsx"
+
+library(openxlsx)
+data=read.xlsx("data_final_proyecto_stad2.xlsx",
+                sheet=1,
+                startRow=1,
+                skipEmptyRows=T,skipEmptyCols=T)
+head(data)
+```
+
+```{r}
+str(data)
+```
+
+```{r}
+data=data[,-c(2,3)] 
+```
+
+```{r}
+data=na.omit(data)
+str(data)
+```
+
+```{r}
+data=na.omit(data)
+data[,4]=as.numeric(data[,4])
+```
+
+```{r}
+str(data)
+```
+
+```{r}
+data[,7]=as.factor(data[,7])
+```
+
+```{r}
+summary(data)
+```
+
+
+Regresión Beta 
+Dependiente: Porcentaje acotado
+
+```{r}
+library(betareg)
+#VD:porcentaje de participación femenina en elecciones provinciales 2018
+#VIs:Minoria.etnica_M , Al.me.secu_M,  TrabajoRemu_M, Conexion_Internet_M,Sin.seg.sal_M, 
+
+
+sub2=c('Porcentaje_M','Al.me.secu_M', 'TrabajoRemu_M', 'Conexion_Internet_M', 'Sin.seg.sal_M')
+reg5=data[,sub2]
+modelBeta=betareg(Porcentaje_M~.,data=reg5)
+summary(modelBeta)
+```
+
+
+Lamentablemente nuestra región no corre debido a que nuestros valores mínimosde  la dependiente, se concentrna mucho en el 0,  por lo tanto es una data muy heterogenea (varía mucho). Por este motivo cambiamos nuestra dependiente a una dicotómica: si en caso hay o no participación de mujeres en las elecciones de alcaldías provinciales 2018, en ese sentido pasaríamos a utilizar una regresión binominal (regresión logística)
+```{r}
+str(reg5$Porcentaje_M)
+```
+
+```{r}
+summary(data$Porcentaje_M)
+```
+
+```{r}
+table(reg5$Porcentaje_M)
+```
+
+
+
+
