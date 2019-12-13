@@ -1,0 +1,143 @@
+
+MAPA provincias- Participación política femenina en las elecciones de alcaldías provinciales2018 
+- María Fernanda 
+- Valerie
+
+```{r}
+library(rio)
+lkXLSX="https://github.com/valerie-marchena/datatrabajofinal/raw/master/data_final_proyecto_stad2.xlsx"
+data=import(lkXLSX)
+str(data)
+```
+
+```{r}
+data=na.omit(data)
+row.names(data)=data$Provincia
+data$Dept_Prov=NULL
+data$Departamento=NULL
+names(data)=c("Provincias","Minoria_etnica", "Al_menos_secundaria", "Trabajo_Remunerado", "Conexion_Internet", "Sin_seguro_salud","Participa_mujer")
+library(stringr)
+library(magrittr)
+library(htmltab)
+library(factoextra)
+library(cluster)
+set.seed(2019)
+theData=data[,c(2:6)]
+g.dist = daisy(theData, metric = "gower")
+pam.resultado=pam(g.dist,5,cluster.only = F)
+data$clusterPT=pam.resultado$cluster
+```
+
+
+```{r}
+# instalar:
+library(sp)
+library(geojsonio)
+library(rgdal)
+
+fromGit="https://github.com/PoliticayGobiernoPUCP/estadistica_anapol2/raw/master/PER_adm2.json" # link desde github
+
+PeruProvs <- rgdal::readOGR(fromGit,stringsAsFactors = FALSE)
+```
+
+```{r}
+plot(PeruProvs, border='black')
+head(PeruProvs@data)
+```
+
+```{r}
+sort(PeruProvs@data$NAME_2)
+```
+
+
+```{r}
+data$Provincia
+```
+
+```{r}
+library(stringi)
+
+PeruProvs$NAME_2=stri_trans_general(str = PeruProvs$NAME_2, 
+                                        id = "Latin-ASCII")
+data$Provincias=stri_trans_general(str = data$Provincias, 
+                                        id = "Latin-ASCII")
+head(data$Provincias)
+```
+
+
+```{r}
+data$Provincias=as.factor(data$Provincias)
+```
+
+```{r}
+data$Participa_mujer=as.factor(data$Participa_mujer)
+```
+
+
+
+```{r}
+test=merge(PeruProvs@data,data,by.x='NAME_2',by.y='Provincias',all.x=T,all.y=T)
+test$id=NULL
+test[!complete.cases(test),]
+```
+
+```{r}
+ProvsFull=merge(PeruProvs,data,by.x='NAME_2',by.y='Provincias')
+```
+
+
+
+```{r}
+str(data)
+```
+
+
+```{r}
+names(ProvsFull)
+```
+
+```{r}
+aggregate(Participa_mujer~clusterPT ,data=ProvsFull,FUN = mean)
+```
+
+```{r}
+str(data)
+```
+
+
+
+
+```{r}
+head(test)
+```
+
+
+
+
+```{r}
+# colores
+myColors=c('blue','pink') # para 1,2
+
+plot(PeruProvs,col='black', main='Participación política femenina en las elecciones de alcaldías provinciales2018 \n usando clusters')
+plot(ProvsFull,col=myColors[ProvsFull$Participa_mujer],add=T,border=NA)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
